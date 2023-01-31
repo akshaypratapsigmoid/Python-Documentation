@@ -1,0 +1,279 @@
+Akshay Pratap Singh TAS153
+
+Question 1:
+
+* We are given n x m grid , where 1 represents land and 0 represents the water. 
+* We have to find the size of the biggest river.
+* A river can twist and can have branches. 
+* If there is no river in grid return 0
+
+My solution:
+
+def dfs(node, grid):
+    x, y = node
+    grid[x][y] = 1
+    size = 0
+    n = len(grid)
+    m = len(grid[0])
+
+    for dx, dy in [(-1, 0), (1, 0), (0, 1), (0,-1)]:
+        new_x, new_y = x + dx, y+dy
+        if 0 <= new_x < n and 0 <= new_y < m and grid[new_x][new_y] == 0:
+            size += dfs((new_x, new_y), grid)
+    return size + 1
+
+
+def find_max_path(grid):
+    ans = 0
+    n = len(grid)
+    m = len(grid[0])
+    for i in range(n):
+        for j in range(m):
+            if grid[i][j] == 0:
+                ans = max(ans, dfs((i, j), grid))
+    return ans
+
+Explanation :
+* The solution is implementing depth first search algorithm.
+* function "find_max_path" will return the answer.
+* we have initialised the ans variable with null value
+* variable 'n' contains length whereas variable 'm' contains length
+* then we will traverse the grid by nested loop
+* during traversal dfs function will be called for checking the '0' or river components.
+* whatever among the result of dfs or already stored ans will be max will be updated in ans(as we want max length)
+* result will be printed
+* In dfs function a list of four different tuples is created which is iterated over in a for loop to traverse all
+  four directions by adding the tuple values to the current index.
+* The condition for indices being out of bounds and value of the next grid index being 0 or 1 is also
+  evaluated in the current recursion.
+
+Complexity Analysis:
+
+Time Complexity: O(n*m)
+Space Complexity: O(n*m)
+
+Peers solutions review:
+
+Ratindar Singh :
+
+def dfs_biggest_river(i, j, grid):
+
+    # check for out of bound index or land
+    if (i == len(grid) or j == len(grid[0]) or grid[i][j] == 1):
+        return 0
+
+    # prevents the traversal from entering endless loop 
+    # i.e. prevents it from traversing the parent again
+    grid[i][j] = 1
+
+    # traverses all directions
+    up = dfs_biggest_river(i-1, j, grid)
+    down = dfs_biggest_river(i+1, j, grid)
+    left = dfs_biggest_river(i, j-1, grid)
+    right = dfs_biggest_river(i, j+1, grid)
+
+    # adds itself and length of connected river from all directions
+    return 1 + up + down + left + right
+
+def main():
+
+    # input matrix representing land and river
+    grid = [ [0,1,1,1,1], [1, 1, 0, 0, 0], [1, 1, 1, 0, 1], [1, 1, 1, 0, 1] ]
+
+    biggest_river = 0
+
+    # loops over every cell of matrix
+    for i in range(len(grid)):
+        for j in range(len(grid[0])):
+            if grid[i][j] == 0:
+                biggest_river = max(biggest_river, dfs_biggest_river(i, j, grid))
+
+    print(biggest_river)
+
+if __name__ == "__main__":
+    main()  
+
+Difference:
+
+* Solution is quite similar of me in terms of having same time complexity and space complexity.
+* Difference is he has created a main function instead of calling the function directly.
+* Instead of creating a tuple he had passed the parameter direct to the dfs function when recursively called.
+  
+Complexity Analysis:
+
+Time Complexity: O(n*m)
+Space Complexity: O(n*m)
+
+
+2. Lav Kumar' solution
+
+def dfs(node, grid):
+    x, y = node
+    grid[x][y] = 1
+    size = 0
+    n = len(grid)
+    m = len(grid[0])
+    arr = [(-1, 0), (1, 0), (0, 1), (0,-1)]
+ 
+    for dx, dy in arr:
+        new_x = x + dx
+        new_y = y + dy
+        if 0 <= new_x < n and 0 <= new_y < m and grid[new_x][new_y] == 0:
+            size += dfs((new_x, new_y), grid)
+    return size + 1
+ 
+ 
+def find_max_path(grid):
+    ans = 0
+    n = len(grid)
+    m = len(grid[0])
+    for i in range(0,n):
+        for j in range(0,m):
+            if grid[i][j] == 0:
+                ans = max(ans, dfs((i, j), grid))
+    return ans
+
+mat=[[0,1,1,1,1], [1,1,0,0,0], [1,1,1,0,1], [1,1,1,0,1]]
+
+print(find_max_path(mat))
+
+The difference:
+
+* The solution is quite similar as this code also implements a depth first search algorithm.
+* The indices are passed as a tuple to the function being called.
+
+
+
+Question 2:
+
+* Design a logger system that receives a stream of messages along with their timestamps. 
+* Each unique message should only be printed at most every 10 seconds (i.e. a message printed at          timestamp t will prevent other identical messages from being printed until timestamp t + 10).
+* All messages will come in chronological order. Several messages may arrive at the same timestamp.
+* Implement the Logger class:
+  * Logger() Initializes the logger object.
+  * bool shouldPrintMessage(int timestamp, String message) Returns true if the message should be            printed in the given, otherwise returns false.
+  
+My solution:
+
+from collections import deque
+
+class Logger(object):
+
+    def _init_(self):
+        """
+        Initialize your data structure here.
+        """
+        self._msg_set = set()
+        self._msg_queue = deque()
+    
+    def shouldPrintMessage(self, timestamp, message):
+        """
+        Returns true if the message should be printed in the given timestamp, otherwise returns false.
+        """
+        while self._msg_queue:
+            msg, ts = self._msg_queue[0]
+            if timestamp - ts >= 10:
+                self._msg_queue.popleft()
+                self._msg_set.remove(msg)
+            else:
+                break
+        
+        if message not in self._msg_set:
+            self._msg_set.add(message)
+            self._msg_queue.append((message, timestamp))
+            return True
+        else:
+            return False
+			
+Explanation:
+
+* Deque is imported from collections
+* a class logger has been created
+* here we have created a method being called upon by the object where we will initialise our set and deque.
+* a function "shouldPrintMessage" has been created which has 3 parameters including message and timestamp
+* then while will check if there is element in queue or not, if yes message and timestamps are added in the queue then timestamps are being checked if time has exceeded 10 units or not if yes pop the message out else break
+* and if message is not in the set then message is added in set and in queue message and timestamp gets added, returning true else False.
+
+Complexity Analysis:
+
+Time Complexity: O(n)
+Space Complexity: O(n)
+
+
+1. Ratindar Singh Pal's Solution.
+
+class Logger:
+
+    def __init__(self):
+        self.message_stream = {}
+        self.history = []
+        self.history.append("null")
+    
+    def shouldPrintMessage(self, timestamp, message):
+
+        if (message not in self.message_stream):
+            self.message_stream[message] = timestamp + 10
+            self.history.append("true")
+            return True
+
+        elif (self.message_stream[message] > timestamp):
+            self.history.append("false")
+            return False
+
+        else:
+            self.message_stream[message] += 10
+            self.history.append("true")
+            return True
+
+def main():
+    logger = Logger()
+
+    input_stream = [[1, "foo"], [2, "bar"], [3, "foo"], [8, "bar"], [10, "foo"], [11, "foo"]]
+    
+    # sends all messages along with their timestamps
+    for ele in input_stream:
+        logger.shouldPrintMessage(ele[0], ele[1])
+
+    print(logger.history)
+
+if __name__ == "__main__":
+    main()
+
+
+The Difference
+
+* Ratindar's solution is quite similar of me time complexity and space complexity are same
+* He has not used set or deque data structures.
+* He has added a list in logger class which will be storing the history.
+
+2. Lav Kumar' solution
+
+class Logger(object):
+ 
+    def _init_(self):
+        self._msg_dict = {}
+    
+    def shouldPrintMessage(self, timestamp, msg):
+        if msg not in self._msg_dict:
+            # case 1). add the message to print
+            self._msg_dict[msg] = timestamp
+            return True
+        
+        timdiff = timestamp - self._msg_dict[message]
+ 
+        if  timdiff >= 10:
+            # case 2). update the timestamp of the message
+            self._msg_dict[msg] = timestamp
+            return True
+        else:
+            return False
+        
+        
+obj=Logger()
+obj.shouldPrintMessage(1, "foo")
+obj.shouldPrintMessage(2, "foo")
+
+The difference:
+
+* In this solution there isn't anything as an instance variable to store history. 
+* Set or deque not used.
